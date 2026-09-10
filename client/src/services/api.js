@@ -4,7 +4,6 @@ const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
 });
 
-// Add JWT token to every request
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("token");
@@ -13,13 +12,11 @@ api.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         }
 
+        config.headers["ngrok-skip-browser-warning"] = "true";
+
         return config;
     },
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
-
-
 
 export default api;
