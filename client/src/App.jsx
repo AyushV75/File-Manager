@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import FileManager from "./pages/FileManager";
@@ -27,6 +28,7 @@ function App() {
 
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+      <SpeedInsights />
     </BrowserRouter>
   );
 }
