@@ -25,10 +25,12 @@ const FileManager = () => {
     currentFolder,
     subfolders,
     files,
+    allFolders,
     loading,
     error,
     loadRoot,
     loadFolder,
+    loadAllFolders,
     folderHistory,
     goBack,
     createFolder,
@@ -180,10 +182,7 @@ const FileManager = () => {
                           <span className="folder-label">Folder</span>
                         </div>
 
-                        <ChevronRight
-                          size={18}
-                          className="folder-chevron"
-                        />
+                        <ChevronRight size={18} className="folder-chevron" />
                       </button>
 
                       <div className="folder-actions">
@@ -298,11 +297,17 @@ const FileManager = () => {
                           type="button"
                           className="item-menu-button"
                           title="Move file"
-                          onClick={(event) => {
+                          onClick={async (event) => {
                             event.stopPropagation();
 
                             setFileToMove(file);
                             setShowMoveFileModal(true);
+
+                            try {
+                              await loadAllFolders();
+                            } catch (error) {
+                              // Context already stores the error.
+                            }
                           }}
                         >
                           <Move size={15} />
@@ -446,9 +451,7 @@ const FileManager = () => {
                 <strong>"{fileToDelete?.name}"</strong>?
               </p>
 
-              <p className="modal-warning">
-                This action cannot be undone.
-              </p>
+              <p className="modal-warning">This action cannot be undone.</p>
 
               <div className="modal-actions">
                 <button
@@ -487,6 +490,7 @@ const FileManager = () => {
         )}
 
         {/* Move File Modal */}
+        {/* Move File Modal */}
         {showMoveFileModal && (
           <div className="modal-overlay">
             <div className="modal">
@@ -510,42 +514,69 @@ const FileManager = () => {
               <h2>Move File</h2>
 
               <p>
-                Choose a destination for{" "}
-                <strong>"{fileToMove?.name}"</strong>.
+                Choose a destination for <strong>"{fileToMove?.name}"</strong>.
               </p>
 
-              {subfolders.length === 0 ? (
+              {allFolders.filter((folder) => folder._id !== currentFolder?._id)
+                .length === 0 ? (
                 <div className="empty-move-state">
                   <Folder size={22} />
                   <p>No other folders available.</p>
                 </div>
               ) : (
                 <div className="move-folder-list">
-                  {subfolders.map((folder) => (
-                    <button
-                      key={folder._id}
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          await moveFile(fileToMove._id, folder._id);
+                  {/* Move to Home / Root */}
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await moveFile(fileToMove._id, null);
 
-                          setShowMoveFileModal(false);
-                          setFileToMove(null);
-                        } catch (error) {
-                          // Context already stores the error.
-                        }
-                      }}
-                      disabled={loading}
-                    >
-                      <span className="move-folder-icon">
-                        <Folder size={18} />
-                      </span>
+                        setShowMoveFileModal(false);
+                        setFileToMove(null);
+                      } catch (error) {
+                        // Context already stores the error.
+                      }
+                    }}
+                    disabled={loading || currentFolder === null}
+                  >
+                    <span className="move-folder-icon">
+                      <Folder size={18} />
+                    </span>
 
-                      <span>{folder.name}</span>
+                    <span>Home</span>
 
-                      <ChevronRight size={17} />
-                    </button>
-                  ))}
+                    <ChevronRight size={17} />
+                  </button>
+
+                  {/* All folders */}
+                  {allFolders
+                    .filter((folder) => folder._id !== currentFolder?._id)
+                    .map((folder) => (
+                      <button
+                        key={folder._id}
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await moveFile(fileToMove._id, folder._id);
+
+                            setShowMoveFileModal(false);
+                            setFileToMove(null);
+                          } catch (error) {
+                            // Context already stores the error.
+                          }
+                        }}
+                        disabled={loading}
+                      >
+                        <span className="move-folder-icon">
+                          <Folder size={18} />
+                        </span>
+
+                        <span>{folder.name}</span>
+
+                        <ChevronRight size={17} />
+                      </button>
+                    ))}
                 </div>
               )}
 

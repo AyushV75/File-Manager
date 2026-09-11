@@ -6,6 +6,7 @@ const FileManagerContext = createContext();
 export const FileManagerProvider = ({ children }) => {
     const [currentFolder, setCurrentFolder] = useState(null);
     const [subfolders, setSubfolders] = useState([]);
+    const[ allFolders, setAllFolders] = useState([]);
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -294,6 +295,7 @@ const navigateToBreadcrumb = async (folderId, historyIndex) => {
             throw error;
         }
     };
+    ;
 
     // Move file
     const moveFile = async (fileId, folder = null) => {
@@ -339,6 +341,23 @@ const navigateToBreadcrumb = async (folderId, historyIndex) => {
         setSubfolders(response.data.subfolders);
         setFiles(response.data.files);
     };
+    const loadAllFolders = async () => {
+    try {
+        setError("");
+
+        const response = await api.get("/folder/all");
+
+        setAllFolders(response.data);
+
+        return response.data;
+    } catch (error) {
+        setError(
+            error.response?.data?.message ||
+            "Failed to load folders."
+        );
+        throw error;
+    }
+}
 
     return (
         <FileManagerContext.Provider
@@ -346,12 +365,14 @@ const navigateToBreadcrumb = async (folderId, historyIndex) => {
                 currentFolder,
                 subfolders,
                 files,
+                allFolders,
                 loading,
                 error,
                 folderHistory,
 
                 loadRoot,
                 loadFolder,
+                loadAllFolders,
                 navigateToBreadcrumb,
                 goBack,
 

@@ -5,13 +5,16 @@ const {
     createFolder,
     getFolderContents,
     getRootContents,
+    getAllFolders,
     updateFolder,
-    deleteFolder
+    deleteFolder,
+    
 } = require("../controllers/folderController");
 
 router.post("/", protect, createFolder);
 
 router.get("/", protect, getRootContents);       // root contents
+router.get ("/all", protect, getAllFolders); 
 router.get("/:id", protect, getFolderContents);    // specific folder's contents
 
 router.put("/:id", protect, updateFolder);
