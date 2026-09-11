@@ -19,7 +19,6 @@ const folderSchema = new mongoose.Schema(
         default: null
     }
 }, { timestamps: true });
-// folderSchema.index({ name: 1, owner: 1 }, { unique: true });
-// folderSchema.index({ parentFolder: 1 }, { unique: true });
+
 
 module.exports= mongoose.model("Folder", folderSchema);
