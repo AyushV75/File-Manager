@@ -19,21 +19,37 @@ const SignUp = () => {
             setError("All fields are required.");
             return;
         }
+        if(password.length<6){
+            setError("Password must be at least 6 characters");
+            return;
+        }
 
         if (password !== confirmPassword) {
             setError("Passwords do not match.");
             return;
         }
+        
 
         try {
             await signup(email, password, confirmPassword);
             navigate("/app");
         } catch (error) {
-            setError(
-                error.response?.data?.message ||
-                "Sign up failed. Please try again."
-            );
+    if (error.name === "ValidationError") {
+        if (error.errors.password) {
+            return res.status(400).json({
+                message: "Password must be at least 6 characters"
+            });
         }
+
+        return res.status(400).json({
+            message: "Invalid user data"
+        });
+    }
+
+    res.status(500).json({
+        message: "Server error"
+    });
+}
     };
 
     return (
