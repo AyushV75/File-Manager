@@ -1,43 +1,127 @@
-<!-- # File Manager Application
+# MERN File Manager
 
-## 1. Project Overview
+A full-stack file management application built using the MERN stack. The application allows authenticated users to create and manage nested folders, upload and organize files, and perform file and folder CRUD operations.
 
-## 2. Technology Stack
+The project focuses on authentication, data isolation, nested folder structures, file management, and clean separation between frontend and backend responsibilities.
 
-## 3. Project Architecture
+---
 
-## 4. Database Design
-   - User
-   - Folder
-   - File
+## Features
 
-## 5. Authentication
-   - Registration
-   - Login
-   - Password hashing
-   - JWT
-   - Protected routes
-   - Data isolation
+### Authentication & Security
 
-## 6. API Endpoints
+- User registration
+- User login
+- Password hashing using bcrypt
+- JWT-based authentication
+- Protected API routes
+- Persistent authentication session
+- Logout functionality
+- User data isolation
+- Ownership validation for folders and files
 
-## 7. Folder Management
+### Folder Management
 
-## 8. File Management
+- Create folders
+- Create nested folders
+- Navigate through nested folders
+- Breadcrumb navigation
+- Rename folders
+- Delete folders
+- Delete folders containing nested folders and files
+- Root-level folders supported
 
-## 9. State Management
-   - React Context API
+### File Management
 
-## 10. File Upload System
+- Upload files using Multer
+- Store uploaded files locally
+- Store file metadata in MongoDB
+- Display file name
+- Display file size
+- Display file type
+- Display upload date
+- Rename files
+- Delete files
+- Move files between folders
 
-## 11. Security Decisions
+### Frontend
 
-## 12. Environment Variables
+- React.js
+- React Context API
+- Authentication state management
+- Folder/file navigation state
+- Responsive interface
+- Axios API communication
+- Loading and error handling
 
-## 13. Installation & Running
+### Backend
 
-## 14. Testing
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT
+- bcrypt
+- Multer
+- CORS
 
-## 15. Deployment
+---
 
-## 16. Design Decisions / Why We Built It This Way -->
+# Tech Stack
+
+## Frontend
+
+- React
+- React Router
+- Context API
+- Axios
+- Lucide React
+- Vite
+
+## Backend
+
+- Node.js
+- Express.js
+- Mongoose
+- JSON Web Tokens (JWT)
+- bcrypt
+- Multer
+- CORS
+- dotenv
+
+## Database
+
+- MongoDB Atlas
+- MongoDB
+- Mongoose ODM
+
+## File Storage
+
+Uploaded files are stored in the backend's local `uploads/` directory.
+
+File metadata is stored in MongoDB.
+
+---
+
+# Project Architecture
+
+The application follows a client-server architecture.
+
+```text
+React Frontend
+      |
+      | Axios + JWT
+      v
+Express API
+      |
+      v
+Authentication Middleware
+      |
+      v
+Controllers
+      |
+      v
+Mongoose Models
+      |
+      v
+MongoDB Atlas
