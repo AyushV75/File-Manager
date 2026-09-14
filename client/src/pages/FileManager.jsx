@@ -489,7 +489,7 @@ const FileManager = () => {
           </div>
         )}
 
-        {/* Move File Modal */}
+        
         {/* Move File Modal */}
         {showMoveFileModal && (
           <div className="modal-overlay">

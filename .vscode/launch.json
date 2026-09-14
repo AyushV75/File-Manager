@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "chrome",
+            "name": "https://file-manager-one-zeta.vercel.app/login",
+            "request": "launch",
+            "url": "https://file-manager-one-zeta.vercel.app/login"
+        }
+    ]
+}
