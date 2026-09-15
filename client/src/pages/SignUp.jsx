@@ -20,7 +20,14 @@ const SignUp = () => {
       setError("All fields are required.");
       return;
     }
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
     
+
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       return;
@@ -32,7 +39,7 @@ const SignUp = () => {
     }
 
     try {
-      await signup(email, password, confirmPassword);
+      await signup(normalizedEmail, password, confirmPassword);
       navigate("/app");
     } catch (error) {
       if (error.name === "ValidationError") {

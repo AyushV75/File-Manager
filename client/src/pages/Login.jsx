@@ -18,9 +18,16 @@ const Login = () => {
             setError("Email and password are required.");
             return;
         }
+        const normalizedEmail = email.trim().toLowerCase();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    
 
         try {
-            await login(email, password);
+            await login(normalizedEmail, password);
             navigate("/app");
         } catch (error) {
             setError(
