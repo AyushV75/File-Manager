@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   ArrowLeft,
   ChevronRight,
@@ -30,6 +30,7 @@ const FileManager = () => {
     error,
     loadRoot,
     loadFolder,
+    loadCurrentFolder,
     loadAllFolders,
     folderHistory,
     goBack,
@@ -43,24 +44,42 @@ const FileManager = () => {
   } = useFileManager();
 
   const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
+  const [creatingFolder, setcreatingFolder] = useState(false);
 
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [folderToRename, setFolderToRename] = useState(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState(null);
+  const [deletingFolder, setdeletingFolder] = useState(false);
 
   const [fileToRename, setFileToRename] = useState(null);
   const [showRenameFileModal, setShowRenameFileModal] = useState(false);
 
   const [showDeleteFileModal, setShowDeleteFileModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
+  const [deletingFile, setDeletingFile] = useState(false);
 
-  const [showMoveFileModal, setShowMoveFileModal] = useState(false);
-  const [fileToMove, setFileToMove] = useState(null);
+  const [moveFileTarget, setMoveFileTarget] = useState(null);
+  const [moveBrowseFolder, setMoveBrowseFolder] = useState(null);
+  const [moveBreadcrumbs, setMoveBreadcrumbs] = useState([]);
+
+  const initialLoadStarted = useRef(false);
 
   useEffect(() => {
-    loadRoot();
+    if (initialLoadStarted.current) return;
+
+    initialLoadStarted.current = true;
+
+    const loadInitialData = async () => {
+      try {
+        await Promise.all([loadRoot(), loadAllFolders()]);
+      } catch (error) {
+        // Error is handled inside FileManagerContext
+      }
+    };
+
+    loadInitialData();
   }, []);
 
   return (
@@ -287,7 +306,7 @@ const FileManager = () => {
 
                             setFileToDelete(file);
                             setShowDeleteFileModal(true);
-                          }}
+                          }} 
                         >
                           <Trash2 size={15} />
                           <span>Delete</span>
@@ -297,17 +316,13 @@ const FileManager = () => {
                           type="button"
                           className="item-menu-button"
                           title="Move file"
-                          onClick={async (event) => {
-                            event.stopPropagation();
+                          onClick={() => {
+                            const fileFolderId =
+                              file.folder?._id || file.folder || null;
 
-                            setFileToMove(file);
-                            setShowMoveFileModal(true);
-
-                            try {
-                              await loadAllFolders();
-                            } catch (error) {
-                              // Context already stores the error.
-                            }
+                            setMoveFileTarget(file);
+                            setMoveBrowseFolder(fileFolderId);
+                            setMoveBreadcrumbs([]);
                           }}
                         >
                           <Move size={15} />
@@ -325,9 +340,33 @@ const FileManager = () => {
         {/* Create Folder Modal */}
         <CreateFolderModal
           isOpen={showCreateFolderModal}
-          onClose={() => setShowCreateFolderModal(false)}
-          onCreate={(name) => createFolder(name, currentFolder?._id)}
-          loading={loading}
+          onClose={() => {
+            if (creatingFolder) return;
+
+            setShowCreateFolderModal(false);
+          }}
+          onCreate={async (name) => {
+            if (creatingFolder) return;
+
+            setcreatingFolder(true);
+
+            try {
+              await createFolder(name, currentFolder?._id);
+
+              // Refresh current folder without adding duplicate history
+              await loadCurrentFolder();
+
+              // Update folder list used by Move File modal
+              await loadAllFolders();
+
+              setShowCreateFolderModal(false);
+            } catch (error) {
+              // Error is already handled inside FileManagerContext
+            } finally {
+              setcreatingFolder(false);
+            }
+          }}
+          loading={creatingFolder}
         />
 
         {/* Rename Folder Modal */}
@@ -338,7 +377,39 @@ const FileManager = () => {
             setFolderToRename(null);
           }}
           currentName={folderToRename?.name}
-          onRename={(name) => renameFolder(folderToRename._id, name)}
+          onRename={async (name) => {
+            if (!folderToRename) return;
+
+            try {
+              const updatedFolder = await renameFolder(
+                folderToRename._id,
+                name,
+              );
+
+              // Refresh current folder without changing breadcrumb history
+              await loadCurrentFolder();
+
+              // Update names used inside Move File modal
+              await loadAllFolders();
+
+              // Update copied move breadcrumbs if this folder is present there
+              setMoveBreadcrumbs((previousBreadcrumbs) =>
+                previousBreadcrumbs.map((folder) =>
+                  String(folder._id) === String(updatedFolder._id)
+                    ? {
+                        ...folder,
+                        name: updatedFolder.name,
+                      }
+                    : folder,
+                ),
+              );
+
+              setShowRenameModal(false);
+              setFolderToRename(null);
+            } catch (error) {
+              // Error is already handled inside FileManagerContext
+            }
+          }}
           loading={loading}
         />
 
@@ -350,7 +421,21 @@ const FileManager = () => {
             setFileToRename(null);
           }}
           currentName={fileToRename?.name}
-          onRename={(name) => renameFile(fileToRename._id, name)}
+          onRename={async (name) => {
+            if (!fileToRename) return;
+
+            try {
+              await renameFile(fileToRename._id, name);
+
+              // Refresh current folder without duplicating breadcrumbs
+              await loadCurrentFolder();
+
+              setShowRenameFileModal(false);
+              setFileToRename(null);
+            } catch (error) {
+              // Error is already handled inside FileManagerContext
+            }
+          }}
           loading={loading}
         />
 
@@ -365,7 +450,7 @@ const FileManager = () => {
                   setShowDeleteModal(false);
                   setFolderToDelete(null);
                 }}
-                disabled={loading}
+                disabled={deletingFolder}
                 aria-label="Close"
               >
                 <X size={18} />
@@ -395,7 +480,7 @@ const FileManager = () => {
                     setShowDeleteModal(false);
                     setFolderToDelete(null);
                   }}
-                  disabled={loading}
+                  disabled={deletingFolder}
                 >
                   Cancel
                 </button>
@@ -404,19 +489,25 @@ const FileManager = () => {
                   type="button"
                   className="danger-action"
                   onClick={async () => {
+                    if (deletingFolder || !folderToDelete) return;
+
+                    setdeletingFolder(true);
+
                     try {
                       await deleteFolder(folderToDelete._id);
 
                       setShowDeleteModal(false);
                       setFolderToDelete(null);
                     } catch (error) {
-                      // Context already stores the error.
+                      // Context already stores the error 
+                    } finally {
+                      setdeletingFolder(false);
                     }
                   }}
-                  disabled={loading}
+                  disabled={deletingFolder || !folderToDelete}
                 >
                   <Trash2 size={16} />
-                  {loading ? "Deleting..." : "Delete Folder"}
+                  {deletingFolder ? "Deleting..." : "Delete Folder"}
                 </button>
               </div>
             </div>
@@ -434,7 +525,7 @@ const FileManager = () => {
                   setShowDeleteFileModal(false);
                   setFileToDelete(null);
                 }}
-                disabled={loading}
+                disabled={deletingFile}
                 aria-label="Close"
               >
                 <X size={18} />
@@ -461,7 +552,7 @@ const FileManager = () => {
                     setShowDeleteFileModal(false);
                     setFileToDelete(null);
                   }}
-                  disabled={loading}
+                  disabled={deletingFile}
                 >
                   Cancel
                 </button>
@@ -470,36 +561,42 @@ const FileManager = () => {
                   type="button"
                   className="danger-action"
                   onClick={async () => {
+                    if (deletingFile || !fileToDelete) return;
+
+                    setDeletingFile(true);
+
                     try {
                       await deleteFile(fileToDelete._id);
 
                       setShowDeleteFileModal(false);
                       setFileToDelete(null);
                     } catch (error) {
-                      // Context already stores the error.
+                      // Error is already handled inside FileManagerContext
+                    } finally {
+                      setDeletingFile(false);
                     }
                   }}
-                  disabled={loading}
+                  disabled={deletingFile || !fileToDelete}
                 >
                   <Trash2 size={16} />
-                  {loading ? "Deleting..." : "Delete File"}
+                  {deletingFile ? "Deleting..." : "Delete File"}
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        
         {/* Move File Modal */}
-        {showMoveFileModal && (
+        {moveFileTarget && (
           <div className="modal-overlay">
-            <div className="modal">
+            <div className="modal move-modal">
               <button
                 type="button"
                 className="modal-close"
                 onClick={() => {
-                  setShowMoveFileModal(false);
-                  setFileToMove(null);
+                  setMoveFileTarget(null);
+                  setMoveBrowseFolder(null);
+                  setMoveBreadcrumbs([]);
                 }}
                 disabled={loading}
                 aria-label="Close"
@@ -514,79 +611,161 @@ const FileManager = () => {
               <h2>Move File</h2>
 
               <p>
-                Choose a destination for <strong>"{fileToMove?.name}"</strong>.
+                Choose a destination for{" "}
+                <strong>"{moveFileTarget.name}"</strong>.
               </p>
 
-              {allFolders.filter((folder) => folder._id !== currentFolder?._id)
-                .length === 0 ? (
-                <div className="empty-move-state">
-                  <Folder size={22} />
-                  <p>No other folders available.</p>
-                </div>
-              ) : (
-                <div className="move-folder-list">
-                  {/* Move to Home / Root */}
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        await moveFile(fileToMove._id, null);
+              {/* Breadcrumb navigation */}
+              <div className="move-breadcrumbs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMoveBrowseFolder(null);
+                    setMoveBreadcrumbs([]);
+                  }}
+                >
+                  Home
+                </button>
 
-                        setShowMoveFileModal(false);
-                        setFileToMove(null);
-                      } catch (error) {
-                        // Context already stores the error.
-                      }
-                    }}
-                    disabled={loading || currentFolder === null}
-                  >
-                    <span className="move-folder-icon">
-                      <Folder size={18} />
-                    </span>
+                {moveBreadcrumbs.map((folder, index) => (
+                  <span key={folder._id}>
+                    {" / "}
 
-                    <span>Home</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const selectedBreadcrumbs = moveBreadcrumbs.slice(
+                          0,
+                          index + 1,
+                        );
 
-                    <ChevronRight size={17} />
-                  </button>
+                        setMoveBreadcrumbs(selectedBreadcrumbs);
+                        setMoveBrowseFolder(folder._id);
+                      }}
+                    >
+                      {folder.name}
+                    </button>
+                  </span>
+                ))}
+              </div>
 
-                  {/* All folders */}
-                  {allFolders
-                    .filter((folder) => folder._id !== currentFolder?._id)
-                    .map((folder) => (
-                      <button
-                        key={folder._id}
-                        type="button"
-                        onClick={async () => {
-                          try {
-                            await moveFile(fileToMove._id, folder._id);
+              {/* Only show direct child folders */}
+              <div className="move-folder-list">
+                {allFolders
+                  .filter((folder) => {
+                    const folderParentId = getParentFolderId(folder);
+                    const currentBrowseId = moveBrowseFolder
+                      ? String(moveBrowseFolder)
+                      : null;
 
-                            setShowMoveFileModal(false);
-                            setFileToMove(null);
-                          } catch (error) {
-                            // Context already stores the error.
-                          }
-                        }}
-                        disabled={loading}
-                      >
-                        <span className="move-folder-icon">
-                          <Folder size={18} />
-                        </span>
+                    return folderParentId === currentBrowseId;
+                  })
+                  .map((folder) => (
+                    <button
+                      key={folder._id}
+                      type="button"
+                      className="move-folder-item"
+                      onClick={() => {
+                        setMoveBrowseFolder(String(folder._id));
 
-                        <span>{folder.name}</span>
+                        setMoveBreadcrumbs((previous) => [
+                          ...previous,
+                          {
+                            _id: String(folder._id),
+                            name: folder.name,
+                          },
+                        ]);
+                      }}
+                    >
+                      <span className="move-folder-icon">
+                        <Folder size={18} />
+                      </span>
 
-                        <ChevronRight size={17} />
-                      </button>
-                    ))}
-                </div>
-              )}
+                      <span>{folder.name}</span>
 
+                      <ChevronRight size={17} />
+                    </button>
+                  ))}
+
+                {allFolders.filter((folder) => {
+                  const folderParentId = getParentFolderId(folder);
+                  const currentBrowseId = moveBrowseFolder
+                    ? String(moveBrowseFolder)
+                    : null;
+
+                  return folderParentId === currentBrowseId;
+                }).length === 0 && (
+                  <div className="empty-move-state">
+                    <Folder size={22} />
+                    <p>No folders inside this location.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
               <div className="modal-actions">
+                <button
+                  type="button"
+                  className="primary-action"
+                  disabled={
+                    loading ||
+                    String(
+                      moveFileTarget.folder?._id ||
+                        moveFileTarget.folder ||
+                        null,
+                    ) === String(moveBrowseFolder)
+                  }
+                  onClick={async () => {
+                    try {
+                      await moveFile(moveFileTarget._id, moveBrowseFolder);
+
+                      // Stay in the current folder
+                      await loadCurrentFolder();
+
+                      // Keep Move File folder list updated
+                      await loadAllFolders();
+
+                      setMoveFileTarget(null);
+                      setMoveBrowseFolder(null);
+                      setMoveBreadcrumbs([]);
+                    } catch (error) {
+                      // Context already stores the error
+                    }
+                  }}
+                >
+                  <Move size={16} />
+                  {loading ? "Moving..." : "Move here"}
+                </button>
+
                 <button
                   type="button"
                   className="secondary-action"
                   onClick={() => {
-                    setShowMoveFileModal(false);
-                    setFileToMove(null);
+                    if (moveBreadcrumbs.length === 0) return;
+
+                    const newBreadcrumbs = moveBreadcrumbs.slice(0, -1);
+
+                    setMoveBreadcrumbs(newBreadcrumbs);
+
+                    setMoveBrowseFolder(
+                      newBreadcrumbs.length > 0
+                        ? newBreadcrumbs[newBreadcrumbs.length - 1]._id
+                        : null,
+                    );
+                  }}
+                  disabled={loading || moveBreadcrumbs.length === 0}
+                >
+                  <ArrowLeft size={16} />
+                  Back
+                </button>
+
+                <button
+                  type="button"
+                  className="secondary-action"
+                  onClick={() => {
+                    setMoveFileTarget(null);
+                    setMoveBrowseFolder(null);
+                    setMoveBreadcrumbs([]);
                   }}
                   disabled={loading}
                 >
@@ -601,6 +780,19 @@ const FileManager = () => {
   );
 };
 
+const getParentFolderId = (folder) => {
+  if (!folder.parentFolder) return null;
+
+  if (typeof folder.parentFolder === "string") {
+    return folder.parentFolder;
+  }
+
+  if (folder.parentFolder._id) {
+    return String(folder.parentFolder._id);
+  }
+
+  return null;
+};
 const formatFileSize = (bytes) => {
   if (bytes === 0) return "0 Bytes";
 

@@ -1,116 +1,123 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
+
 import api from "../services/api";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [authChecking, setAuthChecking] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
 
-    const login = async (email, password) => {
-        try {
-            setLoading(true);
+  const authCheckStarted = useRef(false);
 
-            const response = await api.post("/auth/login", {
-                email,
-                password
-            });
+  const login = async (email, password) => {
+    try {
+      setLoading(true);
 
-            const { _id, email: userEmail, token } = response.data;
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
 
-            localStorage.setItem("token", token);
+      const { _id, email: userEmail, token } = response.data;
 
-            setUser({
-                _id,
-                email: userEmail
-            });
+      localStorage.setItem("token", token);
 
-            return response.data;
-        } finally {
-            setLoading(false);
-        }
-    };
+      setUser({
+        _id,
+        email: userEmail,
+      });
 
-    const signup = async (email, password, confirmPassword) => {
-        try {
-            setLoading(true);
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            if (password !== confirmPassword) {
-                throw new Error("Passwords do not match.");
-            }
+  const signup = async (email, password, confirmPassword) => {
+    try {
+      setLoading(true);
 
-            const response = await api.post("/auth/register", {
-                email,
-                password
-            });
+      if (password !== confirmPassword) {
+        throw new Error("Passwords do not match.");
+      }
 
-            const { _id, email: userEmail, token } = response.data;
+      const response = await api.post("/auth/register", {
+        email,
+        password,
+      });
 
-            localStorage.setItem("token", token);
+      const { _id, email: userEmail, token } = response.data;
 
-            setUser({
-                _id,
-                email: userEmail
-            });
+      localStorage.setItem("token", token);
 
-            return response.data;
-        } finally {
-            setLoading(false);
-        }
-    };
+      setUser({
+        _id,
+        email: userEmail,
+      });
 
-    const loadUser = async () => {
-        const token = localStorage.getItem("token");
+      return response.data;
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (!token) {
-            setAuthChecking(false);
-            return;
-        }
+  const loadUser = async () => {
+    const token = localStorage.getItem("token");
 
-        try {
-            const response = await api.get("/auth/me");
+    if (!token) {
+      setAuthChecking(false);
+      return;
+    }
 
-            setUser(response.data);
-        } catch (error) {
-            localStorage.removeItem("token");
-            setUser(null);
-        } finally {
-            setAuthChecking(false);
-        }
-    };
+    try {
+      const response = await api.get("/auth/me");
 
-    useEffect(() => {
-        loadUser();
-    }, []);
+      setUser(response.data);
+    } catch (error) {
+      localStorage.removeItem("token");
+      setUser(null);
+    } finally {
+      setAuthChecking(false);
+    }
+  };
 
-    const logout = () => {
-        localStorage.removeItem("token");
-        setUser(null);
-    };
+  useEffect(() => {
+    if (authCheckStarted.current) return;
 
-    return (
-        <AuthContext.Provider
-            value={{
-                user,
-                loading,
-                authChecking,
-                login,
-                signup,
-                logout
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
-    );
+    authCheckStarted.current = true;
+
+    loadUser();
+  }, []);
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        authChecking,
+        login,
+        signup,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
+  const context = useContext(AuthContext);
 
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
 
-    return context;
+  return context;
 };

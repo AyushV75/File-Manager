@@ -1,96 +1,92 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 
-const CreateFolderModal = ({
-    isOpen,
-    onClose,
-    onCreate,
-    loading
-}) => {
-    const [name, setName] = useState("");
-    const [error, setError] = useState("");
+const CreateFolderModal = ({ isOpen, onClose, onCreate, loading }) => {
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
 
-    if (!isOpen) {
-        return null;
+  if (!isOpen) {
+    return null;
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    // Prevent submitting while another request is running
+    if (loading) return;
+
+    if (!name.trim()) {
+      setError("Folder name is required.");
+      return;
     }
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
+    try {
+      setError("");
 
-        if (!name.trim()) {
-            setError("Folder name is required.");
-            return;
-        }
+      await onCreate(name.trim());
 
-        try {
-            setError("");
+      setName("");
+      onClose();
+    } catch (error) {
+      setError(error.response?.data?.message || "Failed to create folder.");
+    }
+  };
 
-            await onCreate(name.trim());
+  const handleClose = () => {
+    if (loading) return;
 
-            setName("");
-            onClose();
-        } catch (error) {
-            setError(
-                error.response?.data?.message ||
-                "Failed to create folder."
-            );
-        }
-    };
+    setName("");
+    setError("");
+    onClose();
+  };
 
-    const handleClose = () => {
-        setName("");
-        setError("");
-        onClose();
-    };
+  return (
+    <div className="modal-overlay">
+      <div className="modal">
+        <button
+          type="button"
+          className="modal-close"
+          onClick={handleClose}
+          disabled={loading}
+          aria-label="Close"
+        >
+          <X size={18} />
+        </button>
+        <h2>Create Folder</h2>
 
-    return (
-        <div className="modal-overlay">
-            <div className="modal">
-                <h2>Create Folder</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="folder-name">Folder name</label>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="folder-name">
-                            Folder name
-                        </label>
+            <input
+              id="folder-name"
+              type="text"
+              value={name}
+              onChange={(event) => {
+                setName(event.target.value);
+                setError("");
+              }}
+              placeholder="Enter folder name"
+              autoFocus
+              disabled={loading}
+            />
+          </div>
 
-                        <input
-                            id="folder-name"
-                            type="text"
-                            value={name}
-                            onChange={(event) =>
-                                setName(event.target.value)
-                            }
-                            placeholder="Enter folder name"
-                            autoFocus
-                        />
-                    </div>
+          {error && <div className="error-message">{error}</div>}
 
-                    {error && (
-                        <div className="error-message">
-                            {error}
-                        </div>
-                    )}
+          <div className="modal-actions">
+            <button type="button" onClick={handleClose} disabled={loading}>
+              Cancel
+            </button>
 
-                    <div className="modal-actions">
-                        <button
-                            type="button"
-                            onClick={handleClose}
-                            disabled={loading}
-                        >
-                            Cancel
-                        </button>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                        >
-                            {loading ? "Creating..." : "Create"}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
+            <button type="submit" disabled={loading || !name.trim()}>
+              {loading ? "Creating..." : "Create"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default CreateFolderModal;
