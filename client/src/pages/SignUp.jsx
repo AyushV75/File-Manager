@@ -13,7 +13,7 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     setError("");
 
     if (!email.trim() || !password || !confirmPassword) {
@@ -26,7 +26,6 @@ const SignUp = () => {
       setError("Please enter a valid email address.");
       return;
     }
-    
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
@@ -43,20 +42,18 @@ const SignUp = () => {
       navigate("/app");
     } catch (error) {
       if (error.name === "ValidationError") {
-        if (error.errors.password) {
-          return res.status(400).json({
-            message: "Password must be at least 6 characters",
-          });
+        if (error.errors?.password) {
+          setError("Password must be at least 6 characters");
+          return;
         }
 
-        return res.status(400).json({
-          message: "Invalid user data",
-        });
+        setError("Invalid user data");
+        return;
       }
 
-      res.status(500).json({
-        message: "Server error",
-      });
+      setError(
+        error.response?.data?.message || error.message || "Server error",
+      );
     }
   };
 

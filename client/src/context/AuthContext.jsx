@@ -58,6 +58,8 @@ export const AuthProvider = ({ children }) => {
       });
 
       return response.data;
+    } catch (error) {
+      throw error;
     } finally {
       setLoading(false);
     }

@@ -48,6 +48,7 @@ const FileManager = () => {
 
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [folderToRename, setFolderToRename] = useState(null);
+  const [renamingFolder, setrenamingFolder] = useState(false);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState(null);
@@ -55,6 +56,7 @@ const FileManager = () => {
 
   const [fileToRename, setFileToRename] = useState(null);
   const [showRenameFileModal, setShowRenameFileModal] = useState(false);
+  const [renamingFile, setrenamingFile] = useState(false);
 
   const [showDeleteFileModal, setShowDeleteFileModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
@@ -63,6 +65,7 @@ const FileManager = () => {
   const [moveFileTarget, setMoveFileTarget] = useState(null);
   const [moveBrowseFolder, setMoveBrowseFolder] = useState(null);
   const [moveBreadcrumbs, setMoveBreadcrumbs] = useState([]);
+  const [movingFile, setmovingFile] = useState(false);
 
   const initialLoadStarted = useRef(false);
 
@@ -306,7 +309,7 @@ const FileManager = () => {
 
                             setFileToDelete(file);
                             setShowDeleteFileModal(true);
-                          }} 
+                          }}
                         >
                           <Trash2 size={15} />
                           <span>Delete</span>
@@ -373,6 +376,7 @@ const FileManager = () => {
         <RenameModal
           isOpen={showRenameModal}
           onClose={() => {
+            if (renamingFolder) return;
             setShowRenameModal(false);
             setFolderToRename(null);
           }}
@@ -381,6 +385,8 @@ const FileManager = () => {
             if (!folderToRename) return;
 
             try {
+              setrenamingFolder(true);
+
               const updatedFolder = await renameFolder(
                 folderToRename._id,
                 name,
@@ -408,15 +414,18 @@ const FileManager = () => {
               setFolderToRename(null);
             } catch (error) {
               // Error is already handled inside FileManagerContext
+            } finally {
+              setrenamingFolder(false);
             }
           }}
-          loading={loading}
+          loading={renamingFolder}
         />
 
         {/* Rename File Modal */}
         <RenameModal
           isOpen={showRenameFileModal}
           onClose={() => {
+            if (renamingFile) return;
             setShowRenameFileModal(false);
             setFileToRename(null);
           }}
@@ -425,6 +434,8 @@ const FileManager = () => {
             if (!fileToRename) return;
 
             try {
+              setrenamingFile(true);
+
               await renameFile(fileToRename._id, name);
 
               // Refresh current folder without duplicating breadcrumbs
@@ -434,9 +445,11 @@ const FileManager = () => {
               setFileToRename(null);
             } catch (error) {
               // Error is already handled inside FileManagerContext
+            } finally {
+              setrenamingFile(false);
             }
           }}
-          loading={loading}
+          loading={renamingFile}
         />
 
         {/* Delete Folder Modal */}
@@ -499,7 +512,7 @@ const FileManager = () => {
                       setShowDeleteModal(false);
                       setFolderToDelete(null);
                     } catch (error) {
-                      // Context already stores the error 
+                      // Context already stores the error
                     } finally {
                       setdeletingFolder(false);
                     }
@@ -594,11 +607,13 @@ const FileManager = () => {
                 type="button"
                 className="modal-close"
                 onClick={() => {
+                  if (movingFile) return;
+
                   setMoveFileTarget(null);
                   setMoveBrowseFolder(null);
                   setMoveBreadcrumbs([]);
                 }}
-                disabled={loading}
+                disabled={movingFile}
                 aria-label="Close"
               >
                 <X size={18} />
@@ -620,9 +635,12 @@ const FileManager = () => {
                 <button
                   type="button"
                   onClick={() => {
+                    if (movingFile) return;
+
                     setMoveBrowseFolder(null);
                     setMoveBreadcrumbs([]);
                   }}
+                  disabled={movingFile}
                 >
                   Home
                 </button>
@@ -634,6 +652,8 @@ const FileManager = () => {
                     <button
                       type="button"
                       onClick={() => {
+                        if (movingFile) return;
+
                         const selectedBreadcrumbs = moveBreadcrumbs.slice(
                           0,
                           index + 1,
@@ -642,6 +662,7 @@ const FileManager = () => {
                         setMoveBreadcrumbs(selectedBreadcrumbs);
                         setMoveBrowseFolder(folder._id);
                       }}
+                      disabled={movingFile}
                     >
                       {folder.name}
                     </button>
@@ -649,11 +670,12 @@ const FileManager = () => {
                 ))}
               </div>
 
-              {/* Only show direct child folders */}
+              {/* Direct child folders */}
               <div className="move-folder-list">
                 {allFolders
                   .filter((folder) => {
                     const folderParentId = getParentFolderId(folder);
+
                     const currentBrowseId = moveBrowseFolder
                       ? String(moveBrowseFolder)
                       : null;
@@ -666,6 +688,8 @@ const FileManager = () => {
                       type="button"
                       className="move-folder-item"
                       onClick={() => {
+                        if (movingFile) return;
+
                         setMoveBrowseFolder(String(folder._id));
 
                         setMoveBreadcrumbs((previous) => [
@@ -676,6 +700,7 @@ const FileManager = () => {
                           },
                         ]);
                       }}
+                      disabled={movingFile}
                     >
                       <span className="move-folder-icon">
                         <Folder size={18} />
@@ -689,6 +714,7 @@ const FileManager = () => {
 
                 {allFolders.filter((folder) => {
                   const folderParentId = getParentFolderId(folder);
+
                   const currentBrowseId = moveBrowseFolder
                     ? String(moveBrowseFolder)
                     : null;
@@ -708,7 +734,8 @@ const FileManager = () => {
                   type="button"
                   className="primary-action"
                   disabled={
-                    loading ||
+                    movingFile ||
+                    !moveFileTarget ||
                     String(
                       moveFileTarget.folder?._id ||
                         moveFileTarget.folder ||
@@ -716,32 +743,37 @@ const FileManager = () => {
                     ) === String(moveBrowseFolder)
                   }
                   onClick={async () => {
+                    if (movingFile || !moveFileTarget) return;
+
                     try {
+                      setmovingFile(true);
+
                       await moveFile(moveFileTarget._id, moveBrowseFolder);
 
-                      // Stay in the current folder
-                      await loadCurrentFolder();
-
-                      // Keep Move File folder list updated
-                      await loadAllFolders();
-
+                      // Close the modal after successful move
                       setMoveFileTarget(null);
                       setMoveBrowseFolder(null);
                       setMoveBreadcrumbs([]);
+
+                      // Refresh current folder and folder list
+                      await loadCurrentFolder();
+                      await loadAllFolders();
                     } catch (error) {
                       // Context already stores the error
+                    } finally {
+                      setmovingFile(false);
                     }
                   }}
                 >
                   <Move size={16} />
-                  {loading ? "Moving..." : "Move here"}
+                  {movingFile ? "Moving..." : "Move here"}
                 </button>
 
                 <button
                   type="button"
                   className="secondary-action"
                   onClick={() => {
-                    if (moveBreadcrumbs.length === 0) return;
+                    if (movingFile || moveBreadcrumbs.length === 0) return;
 
                     const newBreadcrumbs = moveBreadcrumbs.slice(0, -1);
 
@@ -753,7 +785,7 @@ const FileManager = () => {
                         : null,
                     );
                   }}
-                  disabled={loading || moveBreadcrumbs.length === 0}
+                  disabled={movingFile || moveBreadcrumbs.length === 0}
                 >
                   <ArrowLeft size={16} />
                   Back
@@ -763,11 +795,13 @@ const FileManager = () => {
                   type="button"
                   className="secondary-action"
                   onClick={() => {
+                    if (movingFile) return;
+
                     setMoveFileTarget(null);
                     setMoveBrowseFolder(null);
                     setMoveBreadcrumbs([]);
                   }}
-                  disabled={loading}
+                  disabled={movingFile}
                 >
                   Cancel
                 </button>
