@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const connectDB = require("./config/db");
+const adminRoutes = require("./routes/adminRoutes");
 
 connectDB();
 
@@ -27,6 +28,7 @@ app.use(
 );
 app.use(express.json());
 app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/admin", adminRoutes);
 app.use("/api/folder", require("./routes/folderRoutes"));
 app.use("/api/file", require("./routes/fileRoutes"));
 app.get("/api/health", (req, res )=> {

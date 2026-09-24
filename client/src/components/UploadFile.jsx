@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { Upload } from "lucide-react";
 
 const UploadFile = ({ currentFolder, uploadFile, loading }) => {
     const fileInputRef = useRef(null);
@@ -34,7 +35,8 @@ const UploadFile = ({ currentFolder, uploadFile, loading }) => {
                 onClick={() => fileInputRef.current.click()}
                 disabled={loading}
             >
-                {loading ? "Uploading..." : "↑ Upload File"}
+                <Upload size={17} />
+                {loading ? "Uploading..." : " Upload File"}
             </button>
         </>
     );

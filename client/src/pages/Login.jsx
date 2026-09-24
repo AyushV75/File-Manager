@@ -24,17 +24,20 @@ const Login = () => {
       setError("Please enter a valid email address.");
       return;
     }
-    
 
-        try {
-            await login(normalizedEmail, password);
-            navigate("/app");
-        } catch (error) {
-            setError(
-                error.response?.data?.message ||
-                "Login failed. Please try again."
-            );
-        }
+    try {
+      const userData = await login(normalizedEmail, password);
+
+      if (userData.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/app");
+      }
+    } catch (error) {
+      setError(
+        error.response?.data?.message || "Login failed. Please try again.",
+      );
+    }
     };
 
     return (

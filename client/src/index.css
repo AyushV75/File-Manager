@@ -95,7 +95,7 @@ button:disabled {
     min-width: 0;
 }
 
-.user-info > span {
+.user-info>span {
     max-width: 220px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -186,6 +186,7 @@ button:disabled {
     font-size: 27px;
     line-height: 1.2;
     color: #111827;
+    cursor: pointer;
 }
 
 .file-manager-header p {
@@ -707,7 +708,7 @@ button:disabled {
     background: #f5f7ff;
 }
 
-.move-folder-list button > span:nth-child(2) {
+.move-folder-list button>span:nth-child(2) {
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -874,7 +875,7 @@ button:disabled {
         gap: 9px;
     }
 
-    .user-info > span {
+    .user-info>span {
         max-width: 130px;
     }
 
@@ -1012,7 +1013,7 @@ button:disabled {
         font-size: 12px;
     }
 
-    .user-info > span {
+    .user-info>span {
         max-width: 90px;
         font-size: 12px;
     }
@@ -1069,6 +1070,7 @@ button:disabled {
         font-size: 11px;
     }
 }
+
 /* =========================
    Authentication Pages
 ========================= */
@@ -1296,4 +1298,375 @@ button:disabled {
     .form-group input {
         padding: 12px;
     }
+}
+
+/* =========================
+   Admin Dashboard
+========================= */
+
+.admin-dashboard {
+    min-height: 100vh;
+    padding: 34px 20px 60px;
+    background: #f5f7fa;
+    color: #1f2937;
+}
+
+.admin-dashboard-inner {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+
+/* =========================
+   Admin Header
+========================= */
+
+.admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.admin-title-row {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.admin-title-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 11px;
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.admin-header h1 {
+    margin: 0 0 4px;
+    font-size: 27px;
+    line-height: 1.2;
+    color: #111827;
+}
+
+.admin-header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================
+   Admin Header Buttons
+========================= */
+
+.admin-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.admin-actions button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 13px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.15s ease;
+}
+
+.admin-file-manager-button {
+    background: #4f46e5;
+    border: 1px solid #4f46e5;
+    color: white;
+}
+
+.admin-file-manager-button:hover {
+    background: #4338ca;
+    border-color: #4338ca;
+}
+
+.admin-logout-button {
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #dc2626;
+}
+
+.admin-logout-button:hover {
+    background: #fff5f5;
+    border-color: #fecaca;
+}
+
+
+/* =========================
+   Summary Cards
+========================= */
+
+.admin-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 30px;
+}
+
+.admin-card {
+    padding: 22px;
+    background: rgb(255, 255, 255);
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.admin-card h2 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.admin-card p {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    color: #111827;
+}
+
+
+/* =========================
+   Admin Main Panel
+========================= */
+
+.admin-panel {
+    min-height: 420px;
+    padding: 26px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+
+/* =========================
+   Admin Sections
+========================= */
+
+.admin-section {
+    width: 100%;
+}
+
+.admin-section .section-header {
+    margin-bottom: 14px;
+}
+
+
+/* =========================
+   Selected User Information
+========================= */
+
+.admin-selected-user {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 24px;
+    padding: 9px 12px;
+    border: 1px solid #e0e7ff;
+    border-radius: 7px;
+    background: #f5f7ff;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.admin-selected-user svg {
+    flex-shrink: 0;
+    color: #4f46e5;
+}
+
+.admin-selected-user strong {
+    color: #374151;
+}
+
+
+/* =========================
+   Admin Move User
+========================= */
+
+.admin-move-user {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 24px;
+    padding: 9px 12px;
+    border: 1px solid #e0e7ff;
+    border-radius: 7px;
+    background: #f5f7ff;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.admin-move-user svg {
+    flex-shrink: 0;
+    color: #4f46e5;
+}
+
+.admin-move-user strong {
+    color: #374151;
+}
+
+
+/* =========================
+   Admin Move Container
+========================= */
+
+.admin-move-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.admin-move-section {
+    margin-top: 24px;
+}
+
+
+/* =========================
+   Admin Move Actions
+========================= */
+
+.admin-move-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 30px;
+}
+
+.admin-move-actions .primary-action,
+.admin-move-actions .secondary-action {
+    flex-shrink: 0;
+}
+
+
+/* =========================
+   Admin Responsive
+========================= */
+
+@media (max-width: 700px) {
+
+    .admin-dashboard {
+        padding: 25px 12px 45px;
+    }
+
+    .admin-header {
+        align-items: flex-start;
+    }
+
+    .admin-title-row {
+        align-items: flex-start;
+    }
+
+    .admin-header h1 {
+        font-size: 24px;
+    }
+
+    .admin-summary {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .admin-panel {
+        padding: 18px;
+    }
+
+    .admin-actions {
+        width: 100%;
+    }
+
+    .admin-actions button {
+        flex: 1;
+    }
+
+    .admin-selected-user,
+    .admin-move-user {
+        width: 100%;
+    }
+
+    .admin-move-actions {
+        justify-content: stretch;
+        flex-wrap: wrap;
+    }
+
+    .admin-move-actions button {
+        flex: 1;
+    }
+}
+
+
+/* =========================
+   Admin Very Small Screens
+========================= */
+
+@media (max-width: 380px) {
+
+    .admin-dashboard {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .admin-title-icon {
+        width: 42px;
+        height: 42px;
+    }
+
+    .admin-header h1 {
+        font-size: 22px;
+    }
+
+    .admin-actions {
+        gap: 7px;
+    }
+
+    .admin-actions button {
+        padding: 8px 9px;
+        font-size: 12px;
+    }
+
+    .admin-selected-user,
+    .admin-move-user {
+        font-size: 11px;
+    }
+}
+.admin-portal-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid #4f46e5;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.admin-portal-button:hover {
+  background: #4338ca;
+  border-color: #4338ca;
 }

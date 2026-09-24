@@ -20,13 +20,23 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
-      const { _id, email: userEmail, token } = response.data;
+      const { _id, email: userEmail, role, token } = response.data;
 
       localStorage.setItem("token", token);
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          _id,
+          email: userEmail,
+          role,
+        }),
+      );
 
       setUser({
         _id,
         email: userEmail,
+        role,
       });
 
       return response.data;
@@ -48,13 +58,23 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
-      const { _id, email: userEmail, token } = response.data;
+      const { _id, email: userEmail, role, token } = response.data;
 
       localStorage.setItem("token", token);
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          _id,
+          email: userEmail,
+          role: role || "user",
+        }),
+      );
 
       setUser({
         _id,
         email: userEmail,
+        role: role || "user",
       });
 
       return response.data;
@@ -76,9 +96,14 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.get("/auth/me");
 
-      setUser(response.data);
+      const userData = response.data;
+
+      setUser(userData);
+
+      localStorage.setItem("user", JSON.stringify(userData));
     } catch (error) {
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
       setUser(null);
     } finally {
       setAuthChecking(false);
@@ -95,6 +120,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
   };
 

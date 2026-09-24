@@ -3,8 +3,10 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import FileManager from "./pages/FileManager";
+import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { FileManagerProvider } from "./context/FileManagerContext";
+import AdminRoute from "./components/AdminRoute";
 import "./index.css";
 
 function App() {
@@ -22,6 +24,14 @@ function App() {
                 <FileManager />
               </FileManagerProvider>
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
           }
         />
         <Route path="/signup" element={<SignUp />} />

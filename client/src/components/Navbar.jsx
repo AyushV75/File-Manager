@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FolderOpen, LogOut } from "lucide-react";
+import { FolderOpen, LogOut, Shield } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
@@ -32,12 +32,18 @@ const Navbar = () => {
 
           <span title={user?.email}>{user?.email}</span>
         </div>
+        {user?.role === "admin" && (
+          <button
+            type="button"
+            className="admin-portal-button"
+            onClick={() => navigate("/admin")}
+          >
+            <Shield size={16} />
+            <span>Admin Portal</span>
+          </button>
+        )}
 
-        <button
-          type="button"
-          className="logout-button"
-          onClick={handleLogout}
-        >
+        <button type="button" className="logout-button" onClick={handleLogout}>
           <LogOut size={16} />
           <span>Logout</span>
         </button>
