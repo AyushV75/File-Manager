@@ -6,11 +6,12 @@ import {
   Folder,
   FolderOpen,
   MoreVertical,
-  Pencil,
   Trash2,
   Move,
   Upload,
   X,
+  FolderPen,
+  FilePen
 } from "lucide-react";
 
 import { useFileManager } from "../context/FileManagerContext";
@@ -219,7 +220,7 @@ const FileManager = () => {
                             setShowRenameModal(true);
                           }}
                         >
-                          <Pencil size={15} />
+                          <FolderPen size={15} />
                           <span>Rename</span>
                         </button>
 
@@ -296,7 +297,7 @@ const FileManager = () => {
                             setShowRenameFileModal(true);
                           }}
                         >
-                          <Pencil size={15} />
+                          <FilePen size={15} />
                           <span>Rename</span>
                         </button>
 
