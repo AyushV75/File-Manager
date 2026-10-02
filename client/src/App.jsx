@@ -7,9 +7,18 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { FileManagerProvider } from "./context/FileManagerContext";
 import AdminRoute from "./components/AdminRoute";
+import { useEffect } from "react";
+import { useAuth } from "./context/AuthContext";
 import "./index.css";
 
 function App() {
+  const { user } = useAuth();
+
+ useEffect(() => {
+    document.title = user
+        ? `File Manager - ${user.email}`
+        : "File Manager";
+}, [user]);
   return (
     <BrowserRouter>
       <Routes>
