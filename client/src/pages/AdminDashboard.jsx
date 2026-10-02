@@ -9,6 +9,9 @@ import {
   LogOut,
   Move,
   Shield,
+  UsersRound,
+  Folders,
+  Files
 } from "lucide-react";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/admin`;
@@ -476,7 +479,7 @@ const AdminDashboard = () => {
               <div>
                 <h1>Move File</h1>
 
-                <p>Move "{moveFile.name}"</p>  
+                <p>Move "{moveFile.name}"</p>
               </div>
             </div>
           </div>
@@ -692,7 +695,7 @@ const AdminDashboard = () => {
 
   if (!selectedUser) {
     return (
-      <div className="admin-dashboard"> 
+      <div className="admin-dashboard">
         <div className="admin-dashboard-inner">
           <div className="admin-header">
             <div>
@@ -727,18 +730,36 @@ const AdminDashboard = () => {
 
           <div className="admin-summary">
             <div className="admin-card">
-              <h2>Total Users</h2>
-              <p>{users.length}</p>
+              <div className="admin-card-icon">
+                <UsersRound size={20} />
+              </div>
+
+              <div className="admin-card-content">
+                <h2>Total Users</h2>
+                <p>{users.length}</p>
+              </div>
             </div>
 
             <div className="admin-card">
-              <h2>Total Folders</h2>
-              <p>{folders.length}</p>
+              <div className="admin-card-icon">
+                <Folders size={20} />
+              </div>
+
+              <div className="admin-card-content">
+                <h2>Total Folders</h2>
+                <p>{folders.length}</p>
+              </div>
             </div>
 
             <div className="admin-card">
-              <h2>Total Files</h2>
-              <p>{files.length}</p>
+              <div className="admin-card-icon">
+                <Files size={20} />
+              </div>
+
+              <div className="admin-card-content">
+                <h2>Total Files</h2>
+                <p>{files.length}</p>
+              </div>
             </div>
           </div>
 

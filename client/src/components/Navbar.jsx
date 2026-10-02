@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FolderOpen, LogOut, Shield } from "lucide-react";
+import { FolderOpen, LogOut, Shield,CircleUserRound } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
@@ -15,7 +15,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-brand">
         <div className="navbar-brand-icon">
-          <FolderOpen size={21} />
+          <FolderOpen size={26} />
         </div>
 
         <div className="navbar-brand-text">
@@ -26,8 +26,11 @@ const Navbar = () => {
 
       <div className="navbar-user">
         <div className="user-info">
-          <div className="user-avatar">
+          {/* <div className="user-avatar">
             {user?.email?.charAt(0).toUpperCase() || "U"}
+          </div> */}
+          <div className="user-icon">
+            <CircleUserRound strokeWidth={1.7} size={32} />
           </div>
 
           <span title={user?.email}>{user?.email}</span>
@@ -38,7 +41,7 @@ const Navbar = () => {
             className="admin-portal-button"
             onClick={() => navigate("/admin")}
           >
-            <Shield size={16} />
+            <Shield  size={16} />
             <span>Admin Portal</span>
           </button>
         )}
